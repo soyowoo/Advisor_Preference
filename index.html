@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advisor Preference</title>
+    <script src="functions.js"></script>
+    <script src="temperature.js"></script>
+    <script src="saveData.js"></script>
+    <script src="https://unpkg.com/jspsych@7.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.0"></script>
+    <!-- <script src="https://unpkg.com/@jspsych/plugin-html-slider-response@1.1.0"></script> -->
+    <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey@0.1.1"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@1.1.0"></script>
+    <script type='text/javascript' src="gaussian.js"></script>
+    <script type='text/javascript' src="box-muller.js"></script>
+    <script type='text/javascript' src="plugin-html-slider-response.js"></script>
+    <link href="https://unpkg.com/jspsych@7.1.2/css/jspsych.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="speechbubble.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/@jspsych/plugin-survey@0.1.1/css/survey.css">
+    <style>
+      tr{
+        width: 100px;
+        height: 100px;
+      }
+      table {
+       margin-left: auto;
+       margin-right: auto;
+       padding: 0px;
+       font-size: 18px;
+       width: 100%;
+       table-layout:fixed;
+      }
+    </style>
+</head>
+<body>
+</body>
+<script>
+    
+var jsPsych = initJsPsych({
+    //on_trial_finish: save_csv,
+    //on_finish: save_csv
+}); 
+
+var timeline = [];
+
+var preload = {
+    type: jsPsychPreload,
+    images: ['img/New_Henry.jpg','img/New_James.jpg']
+};
+timeline.push(preload); 
+
+
+// capture info from Prolific
+var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+var prolific_id_consent = window.location.search.match('[?&]PROLIFIC_PID=\\w+')
+var study_id_consent = window.location.search.match('STUDY_ID=\\w+')
+var session_id_consent = window.location.search.match('SESSION_ID=\\w+')
+
+jsPsych.data.addProperties({ //how to save added properties?
+  subject_id: subject_id,
+  study_id: study_id,
+  session_id: session_id,
+  prolific_id_consent,
+  study_id_consent,
+  session_id_consent
+});
+
+var experimentDate = Date.now();
+
+let saveStructure = new Structure({
+  date: experimentDate,
+  trialsCompleted: 0,
+  complete: false,
+  participantID: subject_id,
+  studyID: study_id,
+  sessionID: session_id,
+  prolific_id_consent: prolific_id_consent,
+  study_id_consent: study_id_consent,
+  session_id_consent: session_id_consent,
+});
+
+
+//const queryString = window.location.search;
+//var pid = queryString.split("ParticipantID=")[1];
+
+var welcome = {type: jsPsychHtmlKeyboardResponse,
+stimulus: `<p style="font-size:40px;font-weight:bold">Welcome to the experiment</p>
+<br>
+<p>Please press any key to begin</p>
+`,
+};
+timeline.push(welcome);
+
+var instructions1 = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `
+  <div class="textContainer";>
+    <p>In this experiment, you will be asked to predict the high temperature of major cities on a given day in the future.</p>
+    <p>You will be asked to guess if the city's high temperature will be lower or higher than a given base temperature.</p>
+    <p>Please also give your accompanying confidence level ranging from 51% to 100%. The midpoint (50%) is unselectable.</p>
+    <p>This is because 50% higher also means 50% lower as there are only two options (similar to a coin toss).</p>
+    <p>An example question is shown below.</p>
+  </div>
+<br><br>
+<p>Will the high temperature in Brussels on February 16, 2023 be lower or higher than <strong>12</strong> degrees Celsius?</p>
+<br>
+<div style="width:21em; transform:translate(20%, 100%);">
+<p>It will be lower</p>
+</div>
+<div style="width:27em; transform:translate(100%, 0%);">
+<p>It will be higher</p>
+</div>
+`,
+    require_movement: true,
+    slider_width: 900,
+    slider_start: 51,
+    max: 101,
+    labels: ['100%' ,'51%', '51%', '100%'],
+    prompt: 'You must move the slider and answer the question to continue.<br><br>'
+};
+timeline.push(instructions1); 
+
+let advisorImage = ['<img src=img/New_Henry.jpg width="270px" height="200px">','<img src="img/New_James.jpg" width="270px" height="200px">']
+let bubble = ['class="box1 sb9"', 'class="box2 sb9"']
+let quote = ['<p class="text-delay">I AM 60% CERTAIN</p> <p class="text-delay-appear">that it will be lower than <br> 12 degrees Celsius</p>', '<p class="text-delay">THERE IS A 60% PROBABILITY</p> <p class="text-delay-appear">that it will be lower than <br> 12 degrees Celsius</p>'];
+let name = ['HENRY', 'JAMES']
+
+const randomNumber= Math.round(Math.random())
+const bubbleNumber= Math.round(Math.random())
+const quoteNumber= Math.round(Math.random())
+const imageNumber= Math.round(Math.random())
+const nameNumber= Math.round(Math.random())
+
+advisorImage = shuffle(advisorImage);
+bubble = shuffle(bubble);
+quote = shuffle(quote);
+name = shuffle(name);
+
+//var quoteRandom = quote[Math.floor(Math.random() * quote.length)]
+
+var instructions2 = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `
+    <p>Once you have provided an answer, you will also be provided with a prediction from an advisor.</p> 
+    <p>Then, a chance to change your answer. Note that the slider starting point is your previous answer.</p>
+    <p>The two advisors are shown below.</p>
+    <br>
+    <p>Will the high temperature in Brussels on February 16, 2023 be lower or higher than <strong>12</strong> degrees Celsius?</p>
+    <div class="flex-container">
+      <div>
+        <div `+ bubble[0]+`>
+          ` + quote[0] + `
+        </div>
+        <div>
+          `+ advisorImage[0]+`
+        </div>
+        <div>
+          <b>`+ name[0] +`</b>
+        </div>
+      </div>
+      <div class="float-child2">
+        <div `+bubble[1]+`>
+          ` + quote[1] + `
+        </div>
+        <div>
+          `+ advisorImage[1]+`
+        </div>
+        <div>
+          <b>`+ name[1] +`</b>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div style="width:21em; transform:translate(30%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(110%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+    prompt: `<p>During the experiment you will only view <strong>one</strong> advisor per question. Advisors will <strong>alternate every three questions</strong>.</p><br>`,
+    require_movement: true,
+    slider_width: 900,
+    slider_start: function() {return jsPsych.data.getLastTrialData().trials[0].response},
+    max: 101,
+    labels: ['100%','51%', '51%','100%'],
+};
+timeline.push(instructions2);
+
+
+var instructionsTraining = {type: jsPsychHtmlButtonResponse,
+stimulus: `<p style="font-size:20px;font-weight:bold">Now, you will be given some practice questions</p>
+<br>
+<p>Please press the button below to begin</p><br>`,
+choices: ['Continue']
+};
+timeline.push(instructionsTraining);
+
+temps = [aucklandTemp, viennaTemp, copenhagenTemp,budapestTemp,newyorkTemp,nairobiTemp, LATemp, tokyoTemp, sydneyTemp, jakartaTemp, parisTemp, torontoTemp, helsinkiTemp, mexicoTemp, mumbaiTemp, buenosairesTemp, beijingTemp, cairoTemp, capetownTemp, madridTemp, istanbulTemp, bangkokTemp, dubaiTemp, amsterdamTemp]
+confidenceTemps = []
+error = []
+errorConfidence = []
+errorTemp = [];
+advisorTemp = []
+tempSample = [];
+advisorSample = [];
+advisorAnchorTemps = [];
+differnce = [];
+tempSample = [];
+anchorTemps = [];
+
+var tempDistribution = gaussian(0, 64);
+var advisorDistribution = gaussian(0, 64)
+
+for (let x=0;x<temps.length;x++)
+{
+
+  let tempValue = Math.round(tempDistribution.ppf(Math.random()));
+  while(tempValue > 10 || tempValue < -10 || tempValue == 0)
+  {
+    tempValue = Math.round(tempDistribution.ppf(Math.random()));
+  }
+  tempSample[x] = tempValue;
+
+  anchorTemps[x] = temps[x] + tempSample[x]
+
+  let advisorValue = Math.round(advisorDistribution.ppf(Math.random()));
+  while(advisorValue > 10 || advisorValue < -10)
+  {
+    advisorValue = Math.round(advisorDistribution.ppf(Math.random()));
+  }
+  advisorSample[x] = advisorValue;
+
+  advisorAnchorTemps[x] = temps[x] + advisorSample[x] 
+    //errorConfidence[x] = randomIntFromInterval(-10, 10);
+    //confidenceTemps[x] = 50+(Math.abs(sample[x])*5) + randomIntFromInterval(-10, 10);
+    //Math.round((60+(Math.floor(Math.abs(errorTemp[x])/4))*15) + errorConfidence[x]);\
+    differnce[x] = Math.abs(anchorTemps[x]-advisorAnchorTemps[x])
+    if (Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) <= 2) {
+      confidenceTemps[x]= (randomIntFromInterval(51, 60))
+    } else if (Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) >= 3 && Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) <= 4) {
+      confidenceTemps[x] = (randomIntFromInterval(61, 70))
+    } else if (Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) >= 5 && Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) <= 7) {
+      confidenceTemps[x] = (randomIntFromInterval(71, 80))
+    } else if (Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) >= 8 && Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) <= 9) {
+      confidenceTemps[x] = (randomIntFromInterval(81, 90))
+    } else if (Math.abs(anchorTemps[x]-advisorAnchorTemps[x]) >= 10) {
+      confidenceTemps[x] = (randomIntFromInterval(91, 100))
+    }; //linear function for confidence and differene
+    if (advisorAnchorTemps[x]<=anchorTemps[x]){
+      advisorTemp.push('lower')
+    } else if (advisorAnchorTemps[x]>anchorTemps[x]){
+      advisorTemp.push('higher')
+    }
+  //Math.abs(errorTemp[0]+errorTemp[1]+errorTemp[3]) = Math.abs(errorTemp[2]+errorTemp[4]+errorTemp[5]))
+};
+
+/*console.log(tempSample)
+console.log(differnce)
+console.log(confidenceTemps)
+console.log(advisorSample)
+console.log(advisorAnchorTemps)
+console.log(anchorTemps)
+*/
+
+let round = 5;
+
+if (quote[0] == '<p class="text-delay">I AM 60% CERTAIN</p> <p class="text-delay-appear">that it will be lower than <br> 12 degrees Celsius</p>') {
+  round = 0;
+} else if (quote[1] == '<p class="text-delay">I AM 60% CERTAIN</p> <p class="text-delay-appear">that it will be lower than <br> 12 degrees Celsius</p>') {
+  round = 1;
+}
+
+var attentionCheck = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `<p>This is an attention checking question please select 100% lower (i.e. move slider to left end) <strong>17</strong> degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(95%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveAttentionCheck1(trial);
+    let attentionCheck1 = checkSlider2(trial.response)
+    if (attentionCheck1 == 1) {
+    jsPsych.endExperiment('You have failed the attention checking questions.<br>You can no longer participate in the study and will not be compensated.<br> Thank you for your time.')
+    }
+  }
+};
+
+var attentionCheckA = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>This is an attention checking question please select 100% lower (i.e. move slider to left end) <strong>17</strong> degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM 60% SURE</p>
+      <p class="text-delay-appear">that it will be higher than<br> 17 degrees Celsius</p>
+    </div>
+    <div>
+        `+ advisorImage[round]+`
+    </div>
+    <div>
+        <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(95%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() {return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveAttentionCheck2(trial);
+    let attentionCheck2 = checkSlider2(trial.response)
+    if (attentionCheck2 == 1) {
+    jsPsych.endExperiment('You have failed the attention checking questions.<br>You can no longer participate in the study and will not be compensated.<br> Thank you for your time.')
+    }
+  }
+};
+
+var TQ1 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `<p>Will the high temperature in Auckland, New Zealand on February 5, 2023 be lower or higher than<strong> ` + anchorTemps[0] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(20%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(100%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var TQ1A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Auckland, New Zealand on February 5, 2023 be lower or higher than<strong> ` + anchorTemps[0] + ` </strong>degrees Celsius?</p>
+      <div style="margin-top: 25px;" `+bubble[round]+`>
+        <p class="text-delay">I AM ` + confidenceTemps[0] + `% SURE </p>
+        <p class="text-delay-appear">that it will be ` + advisorTemp[0] +  ` than<br> ` + anchorTemps[0] + ` degrees Celsius</p>
+      </div>
+      <div>
+          `+ advisorImage[round]+`
+      </div>
+      <div>
+          <b>`+ name[round] +`</b>
+      </div>
+    <div style="width:21em; transform:translate(20%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(100%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var TQ2 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Vienna, Austria on August 31, 2023 be lower or higher than<strong> ` + anchorTemps[1] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var TQ2A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Vienna, Austria on August 31, 2023 be lower or higher than<strong> ` + anchorTemps[1] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[1] + `% CERTAIN </p>
+      <p class="text-delay-appear">that it will be ` + advisorTemp[1] +  ` than<br> ` + anchorTemps[1] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response}, function() {return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+
+var TQ3 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Copenhagen, Denmark on July 9, 2023 be lower or higher than<strong> ` + anchorTemps[2] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(95%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var TQ3A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Copenhagen, Denmark on July 9, 2023 be lower or higher than<strong> ` + anchorTemps[2] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[2]+`% CHANCE </p>
+      <p class="text-delay-appear">that it will be ` + advisorTemp[2] + ` than<br> ` + anchorTemps[2] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(95%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var TQ4 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Budapest, Hungary on March 29, 2023 be lower or higher than<strong> ` + anchorTemps[3] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(95%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var TQ4A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `
+    <p>Will the high temperature in Budapest, Hungary on March 29, 2023 be lower or higher than<strong> ` + anchorTemps[3] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[3] + `% CONFIDENT </p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[3] +  ` than<br> ` + anchorTemps[3] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(95%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var TQ5 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in New York, U.S.A. on June 1, 2023 be lower or higher than<strong> ` + anchorTemps[4] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var TQ5A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in New York, U.S.A. on June 1, 2023 be lower or higher than<strong> ` + anchorTemps[4] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[4]+`% PROBABILITY</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[4] + ` than<br> ` + anchorTemps[4] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var TQ6 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Nairobi, Kenya on April 14, 2023 be lower or higher than<strong> ` + anchorTemps[5] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var TQ6A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Nairobi, Kenya on April 14, 2023 be lower or higher than<strong> ` + anchorTemps[5] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[5]+`% LIKELIHOOD</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[5] + ` than<br> ` + anchorTemps[5] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var trainingArrayAleatory = [[TQ3, TQ3A], [TQ5, TQ5A], [TQ6, TQ6A]];
+var trainingArrayEpi = [[TQ1,TQ1A], [TQ2, TQ2A], [TQ4, TQ4A]];
+
+trainingArrayAleatory = shuffle(trainingArrayAleatory);
+trainingArrayEpi = shuffle(trainingArrayEpi);
+
+trainingArrayAleatory = trainingArrayAleatory.flat();
+trainingArrayEpi = trainingArrayEpi.flat();
+
+trainingArray2 = []
+
+if (Math.random() > 0.5) {
+  trainingArray2 = trainingArrayAleatory.concat(trainingArrayEpi);
+} else {
+  trainingArray2 = trainingArrayEpi.concat(trainingArrayAleatory);
+}
+trainingArray2 = trainingArray2.flat();
+
+
+//var trainingArray = [[TQ3, TQ3A], [TQ5, TQ5A], [TQ6, TQ6A], [TQ1,TQ1A], [TQ2, TQ2A], [TQ4, TQ4A]]
+//trainingArray = shuffle(trainingArray);
+//trainingArray = trainingArray.flat();
+
+for (let i = 0; i < trainingArray2.length; i++)
+    {
+    	timeline.push(trainingArray2[i]);
+    };
+
+//test
+var testInstruction = {type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <p>You have now completed the practice questions.</p><br>
+    <p>Press the button below to start the test questions.</p><br>
+    `,
+    choices: ['Continue']
+};
+timeline.push(testInstruction)
+
+var Q1 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `<p>Will the high temperature in Los Angeles, U.S.A. on September 17, 2023 be lower or higher than<strong> ` + anchorTemps[6] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(20%, 100%);">
+      <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(100%, 0%);">
+      <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q1A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Los Angeles, U.S.A. on September 17, 2023 be lower or higher than<strong> ` + anchorTemps[6] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[6] + `% SURE</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[6] + ` than<br> ` + anchorTemps[6] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(20%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(100%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q2 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Tokyo, Japan on July 28, 2023 be lower or higher than<strong> ` + anchorTemps[7] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+    <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q2A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Tokyo, Japan on July 28, 2023 be lower or higher than<strong> ` + anchorTemps[7] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[7]+ `% CERTAIN</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[7] + ` than<br> ` + anchorTemps[7] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q3 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Sydney, Australia on May 4, 2023 be lower or higher than<strong> ` + anchorTemps[8] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q3A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Sydney, Australia on May 4, 2023 be lower or higher than<strong> ` + anchorTemps[8] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[8]+`% CHANCE</p>
+      <p class="text-delay-appear">that it will be ` + advisorTemp[8] + ` than<br> ` + anchorTemps[8] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q4 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Jakarta, Indonesia on March 12, 2023 be lower or higher than<strong> ` + anchorTemps[9] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q4A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `
+    <p>Will the high temperature in Jakarta, Indonesia on March 12, 2023 be lower or higher than<strong> ` + anchorTemps[9] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[9]+`% CONFIDENT</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[9] + ` than<br> ` + anchorTemps[9] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q5 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Paris, France on November 9, 2023 be lower or higher than<strong> ` + anchorTemps[10] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q5A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Paris, France on November 9, 2023 be lower or higher than<strong> ` + anchorTemps[10] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[10]+`% PROBABILITY</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[10] + ` than<br> ` + anchorTemps[10] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q6 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Toronto, Canada on October 20, 2023 be lower or higher than<strong> ` + anchorTemps[11] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q6A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Toronto, Canada on October 20, 2023 be lower or higher than<strong> ` + anchorTemps[11] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[11]+`% LIKELIHOOD</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[11] + ` than<br> ` + anchorTemps[11] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q7 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `<p>Will the high temperature in Helsinki, Finland on April 23, 2023 be lower or higher than<strong> ` + anchorTemps[12] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q7A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Helsinki, Finland on April 23, 2023 be lower or higher than<strong> ` + anchorTemps[12] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[12] + `% SURE</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[12] + ` than<br> ` + anchorTemps[12] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q8 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Mexico City, Mexico on January 15, 2023 be lower or higher than<strong> ` + anchorTemps[13] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(15%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(95%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q8A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Mexico City, Mexico on January 15, 2023 be lower or higher than<strong> ` + anchorTemps[13] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[13]+ `% CERTAIN</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[13] + ` than<br> ` + anchorTemps[13] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(15%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(95%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q9 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Mumbai, India on August 30, 2023 be lower or higher than<strong> ` + anchorTemps[14] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q9A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Mumbai, India on August 30, 2023 be lower or higher than<strong> ` + anchorTemps[14] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[14]+`% CHANCE</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[14] + ` than<br> ` + anchorTemps[14] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q10 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Buenos Aires, Argentina on February 18, 2023 be lower or higher than<strong> ` + anchorTemps[15] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(20%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(100%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q10A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `
+    <p>Will the high temperature in Buenos Aires, Argentina on February 18, 2023 be lower or higher than<strong> ` + anchorTemps[15] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[15]+`% CONFIDENT</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[15] + ` than<br> ` + anchorTemps[15] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(20%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(100%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q11 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Beijing, China on September 12, 2023 be lower or higher than<strong> ` + anchorTemps[16] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q11A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Beijing, China on September 12, 2023 be lower or higher than<strong> ` + anchorTemps[16] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[16]+`% PROBABILITY</p> 
+      <p class="text-delay-appear">that it will be ` + advisorTemp[16] + ` than<br> ` + anchorTemps[16] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q12 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Cairo, Egypt on April 21, 2023 be lower or higher than<strong> ` + anchorTemps[17] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q12A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Cairo, Egypt on April 21, 2023 be lower or higher than<strong> ` + anchorTemps[17] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[17]+`% LIKELIHOOD</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[17] + ` than<br> ` + anchorTemps[17] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q13 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `<p>Will the high temperature in Cape town, South Africa on November 9, 2023 be lower or higher than<strong> ` + anchorTemps[18] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(20%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(100%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q13A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Cape town, South Africa on November 9, 2023 be lower or higher than<strong> ` + anchorTemps[18] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[18]+`% CHANCE</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[18] + ` than<br> ` + anchorTemps[18] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(20%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(100%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q14 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Madrid, Spain on December 3, 2023 be lower or higher than<strong> ` + anchorTemps[19] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q14A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Madrid, Spain on December 3, 2023 be lower or higher than<strong> ` + anchorTemps[19] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[19]+ `% CERTAIN</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[19] + ` than<br> ` + anchorTemps[19] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q15 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Istanbul, Turkey on June 25, 2023 be lower or higher than<strong> ` + anchorTemps[20] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(20%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(100%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q15A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Istanbul, Turkey on June 25, 2023 be lower or higher than<strong> ` + anchorTemps[20] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[20] + `% SURE</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[20] + ` than<br> ` + anchorTemps[20] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q16 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Bangkok, Thailand on October 6, 2023 be lower or higher than<strong> ` + anchorTemps[21] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(10%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(90%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q16A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `
+    <p>Will the high temperature in Bangkok, Thailand on October 6, 2023 be lower or higher than<strong> ` + anchorTemps[21] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[round]+`>
+      <p class="text-delay">I AM ` + confidenceTemps[21]+`% CONFIDENT</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[21] + ` than<br> ` + anchorTemps[21] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[round]+`
+    </div>
+    <div>
+      <b>`+ name[round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(10%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(90%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q17 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Dubai, United Arab Emirates on January 10, 2023 be lower or higher than<strong> ` + anchorTemps[22] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(20%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(100%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q17A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Dubai, United Arab Emirates on January 10, 2023 be lower or higher than<strong> ` + anchorTemps[22] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[22]+`% PROBABILITY</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[22] + ` than<br> ` + anchorTemps[22] + ` degrees Celsius</p>    
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(20%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(100%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+var Q18 = {
+  type: jsPsychHtmlSliderResponse,
+  stimulus: `
+  <p>Will the high temperature in Amsterdam, Netherlands on July 2, 2023 be lower or higher than<strong> ` + anchorTemps[23] + ` </strong>degrees Celsius?</p>
+  <div style="width:21em; transform:translate(15%, 100%);">
+   <p>It will be lower</p>
+  </div>
+  <div style="width:27em; transform:translate(95%, 0%);">
+    <p>It will be higher</p>
+  </div>
+  `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: 51,
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],  
+  button_label: 'Press to submit your answer and view advisor',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+}
+
+var Q18A = {
+    type: jsPsychHtmlSliderResponse,
+    stimulus: `<p>Will the high temperature in Amsterdam, Netherlands on July 2, 2023 be lower or higher than<strong> ` + anchorTemps[23] + ` </strong>degrees Celsius?</p>
+    <div style="margin-top: 25px;" `+bubble[1-round]+`>
+      <p class="text-delay">THERE IS A ` + confidenceTemps[23]+`% LIKELIHOOD</p> 
+      <p class="text-delay-appear"> that it will be ` + advisorTemp[23] + ` than<br> ` + anchorTemps[23] + ` degrees Celsius</p>
+    </div>
+    <div>
+      `+ advisorImage[1-round]+`
+    </div>
+    <div>
+      <b>`+ name[1-round] +`</b>
+    </div>
+    <div style="width:21em; transform:translate(15%, 100%);">
+      <p>It will be lower</p>
+    </div>
+    <div style="width:27em; transform:translate(95%, 0%);">
+      <p>It will be higher</p>
+    </div>
+    `,
+  require_movement: true,
+  slider_width: 900,
+  slider_start: function() { return jsPsych.data.getLastTrialData().trials[0].response},
+  max: 101,
+  labels: ['100%','51%', '51%','100%'],
+  button_label: 'Press to submit your final answer',
+  on_finish: (trial)=>{
+    saveStructure.saveSliderResponse(trial);
+  }
+};
+
+
+var aleatoryArray = [[Q3, Q3A],[Q5, Q5A],[Q6, Q6A],[Q9,Q9A], [Q11, Q11A],[Q12, Q12A], [Q13, Q13A], [Q17, Q17A], [Q18, Q18A]]
+aleatoryArray1 = []
+aleatoryArray2 = []
+aleatoryArray3 = []
+
+aleatoryArray = shuffle(aleatoryArray);
+aleatoryArray = aleatoryArray.flat();
+
+aleatoryArray1 = aleatoryArray.slice(0, 6)
+aleatoryArray2 = aleatoryArray.slice(6,12)
+aleatoryArray3 = aleatoryArray.slice(12,(aleatoryArray.length+1))
+
+var epistemicArray = [[Q1,Q1A], [Q2, Q2A],[Q4, Q4A],[Q7, Q7A],[Q8, Q8A],[Q10, Q10A], [Q14, Q14A], [Q15, Q15A], [Q16, Q16A]]
+epistemicArray = shuffle(epistemicArray);
+epistemicArray = epistemicArray.flat();
+
+epistemicArray1 = []
+epistemicArray2 = []
+epistemicArray3 = []
+
+epistemicArray1= epistemicArray.slice(0, 6)
+epistemicArray2 = epistemicArray.slice(6,12)
+epistemicArray3 = epistemicArray.slice(12,(epistemicArray.length+1))
+
+combined = []
+
+if (Math.random() > 0.5) {
+  combined = [...epistemicArray1, ...aleatoryArray1, ...epistemicArray2, ...aleatoryArray2, ...epistemicArray3, ...aleatoryArray3];
+} else {
+  combined = [...aleatoryArray1, ...epistemicArray1, ...aleatoryArray2, ...epistemicArray2, ...aleatoryArray3, ...epistemicArray3];
+}
+
+/**
+var evenNumber;
+ do {
+  evenNumber = Math.floor(Math.random()*20 + 1)
+ } while( evenNumber % 2 == 1 && evenNumber< 22);
+*/
+randomNumberArray = [6, 12, 18, 24]
+randomNumberArray = shuffle(randomNumberArray)
+combined.splice(randomNumberArray[0],0,attentionCheck, attentionCheckA)
+console.log(combined)
+
+for (let i = 0; i < combined.length; i++)
+    {
+    	timeline.push(combined[i]);
+    };
+
+
+var checkInstruction = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <p>Thank you for completing the test questions.</p>
+    <p>We would now like to ask you some questions about the task</p>
+    <p>Press the button below to continue</p>
+    `,
+  choices: ['Continue']
+};
+timeline.push(checkInstruction)
+
+
+//advisor evaluation
+var advisorLikertScale = [
+  "Not at all=1", 
+  " ", 
+  " ", 
+  " ", 
+  " ",
+  " ",
+  "Extremely=7"
+];
+
+var advisorLikertScale2 = [
+  "Not at all=1", 
+  " ", 
+  " ", 
+  " ", 
+  " ",
+  " ",
+  "Definitely=7"
+];
+
+//"The temperature in " + cities[i] + " is " + temps[i]
+//temps = ["high", "low", "high"]
+//cities = ["Lisbon", "Paris", "London"]
+
+
+var advisorARating = {
+  type: jsPsychSurveyLikert,
+  questions: [
+    {prompt: "How knowledgeable is this advisor?", 
+    name: 'KnowledgeableA', 
+    required: true,
+    labels: advisorLikertScale,
+},
+    {prompt: "How competent is this advisor?", 
+    name: 'CompetentA', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How much do you trust this advisor?", 
+    name: 'TrustA', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How credible is this advisor?", 
+    name: 'CredibleA', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How accurate is this advisor?", 
+    name: 'AccurateA', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How persuasive is this advisor?", 
+    name: 'PersuasiveA', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "Would you seek additional information or advice from this person in the future?", 
+    name: 'Information_SeekingA', 
+    required: true,
+    labels: advisorLikertScale2
+},
+  ],
+  randomize_question_order: true,
+  required: true,
+  preamble: '<p>Please rate '+name[round]+' on the following questions</p><br>'+ advisorImage[round]+'',
+  on_finish: (trial)=>{
+    saveStructure.saveAdvisorARating(trial);
+  }
+};
+
+
+var advisorBRating = {
+  type: jsPsychSurveyLikert,
+  questions: [
+    {prompt: "How knowledgeable is this advisor?", 
+    name: 'KnowledgeableB', 
+    required: true,
+    labels: advisorLikertScale,
+},
+    {prompt: "How competent is this advisor?", 
+    name: 'CompetentB', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How much do you trust this advisor?", 
+    name: 'TrustB', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How credible is this advisor?", 
+    name: 'CredibleB', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How accurate is this advisor?", 
+    name: 'AccurateB', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "How persuasive is this advisor?", 
+    name: 'PersuasiveB', 
+    required: true,
+    labels: advisorLikertScale
+},
+    {prompt: "Would you seek additional information or advice from this person in the future?", 
+    name: 'Information_SeekingB', 
+    required: true,
+    labels: advisorLikertScale2
+},
+  ],
+  randomize_question_order: true,
+  preamble: '<p>Please rate '+name[1-round]+' on the following questions</p><br>'+ advisorImage[1-round]+'',
+  on_finish: (trial)=>{
+    saveStructure.saveAdvisorBRating(trial);
+  }
+};
+
+advisorArray = [advisorARating, advisorBRating]
+
+advisorArray = shuffle(advisorArray);
+
+for (let i = 0; i < advisorArray.length; i++)
+    {
+    	timeline.push(advisorArray[i]);
+    };
+
+//manipulation check
+var manipulationCheck = {type: jsPsychSurveyMultiChoice,
+ preamble: `
+ <p>Please indicate which advisor (`+name[0]+` or `+name[1]+`) is more likely to give the following advice.</p>
+ <div class="flex-container2">
+    <div>`+ advisorImage[0]+ ` <br><b>`+name[0]+`</b></div>
+    <div>`+ advisorImage[1]+ `<br> <b>`+name[1]+`</b></div>
+  </div>
+ `,
+  questions: [
+    {
+      prompt: "I am 60% sure that it occurred before the year 1932", 
+      name: 'epistemicSure', 
+      options: [''+name[0]+'', ''+name[1]+''],
+      required: true,
+      horizontal: false
+    }, 
+    {
+      prompt: "I am 70% confident that it occurred after the year 1965", 
+      name: 'epistemicConfident', 
+      options: [''+name[0]+'', ''+name[1]+''], 
+      required: true,
+      horizontal: false
+    },
+    {prompt: "I am 65% certain that it occurred after the year 1918", 
+      name: 'epistemicCertain', 
+      options: [''+name[0]+'', ''+name[1]+''], 
+      required: true,
+      horizontal: false
+    },
+    {prompt: "There is a 60% chance that it occurred before the year 1996", 
+      name: 'aleatoryChance', 
+      options: [''+name[0]+'', ''+name[1]+''], 
+      required: true,
+      horizontal: false
+    },
+    {prompt: "There is a 70% probability that it occurred after the year 1927", 
+      name: 'aleatoryProbability', 
+      options: [''+name[0]+'', ''+name[1]+''], 
+      required: true,
+      horizontal: false
+    },
+    {prompt: "There is a 65% likelihood that it occurred before the year 1971", 
+      name: 'aleatoryLikelihood', 
+      options: [''+name[0]+'', ''+name[1]+''], 
+      required: true,
+      horizontal: false
+    },
+  ],
+  randomize_question_order: true,
+  on_finish: (trial)=>{
+    saveStructure.saveManipulationCheck(trial);
+  }
+};
+timeline.push(manipulationCheck)
+
+var EARSLikertScale = [
+  "Not at all = 1", 
+  " ", 
+  " ", 
+  " ", 
+  " ",
+  " ",
+  "Very Much = 7"
+];
+
+var EARS = {
+  type: jsPsychSurveyLikert,
+  preamble: `
+  <p>Please rate the following event based on the question below.</p>
+  <p>"Predicting the temperature of a city on a specific future date</p>`,
+  questions: [
+    {prompt: "...is something that has an element of randomness", 
+    name: 'randomness', 
+    required: true,
+    labels: EARSLikertScale
+},
+    {prompt: "...feels like it is determined by chance factors", 
+    name: 'chance', 
+    required: true,
+    labels: EARSLikertScale
+},
+    {prompt: "...is knowable in advance, given enough information", 
+    name: 'knowable', 
+    required: true,
+    labels: EARSLikertScale
+},
+    {prompt: "...is something that well-informed people would agree on", 
+    name: 'well_informed', 
+    required: true,
+    labels: EARSLikertScale
+},
+],
+  randomize_question_order: true,
+  on_finish: (trial)=>{
+    saveStructure.saveEARS(trial);
+  }
+};
+timeline.push(EARS)
+
+var demoInstruction = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <p>Finally, please answer some demographic questions.</p>
+    <p>Press the button below to continue.</p>
+    `,
+  choices: ['Continue']
+};
+timeline.push(demoInstruction)
+
+var demographics = {
+  type: jsPsychSurvey,
+  pages: [
+    [
+     {
+        type: 'html',
+        prompt: 'Please provide your demographic information.',
+      },
+      {
+        type: 'text',
+        prompt: "Please indicate your age (in years old)", 
+        name: 'Age', 
+        textbox_columns: 5,
+        required: false,
+      },
+      {
+        type: 'multi-choice',
+        prompt: "Please indicate your gender", 
+        options: ['Female', 'Male', 'Non-binary', 'Prefer not to say'],
+        name: 'Gender', 
+        required: true,
+      }, 
+    ]
+  ],
+  button_label_finish: 'Finish',
+  on_finish: (trial)=>{
+    saveStructure.saveDemographics(trial);
+  }
+};
+timeline.push(demographics)
+
+var debrief = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+  <p>Thank you for your participation.</p>
+  <p>The current study aimed to investigate how different language styles used by advisors influence how people process advice and evaluate the advisor.</p>
+  <br> 
+  <p>If you have further questions regarding the study please do not hesitate to contact So Young Woo (so.woo@pmb.ox.ac.uk).</p>
+  <br>
+  `,
+  choices: ['Finish'], 
+  prompt: '* Note that once you press Finish you can no longer withdraw your data'
+};
+timeline.push(debrief)
+
+var end = {type: jsPsychHtmlKeyboardResponse,
+stimulus: `<p style="font-size:30px;font-weight:bold">Thank you. Your data has now been saved.</p>
+<br>
+<p>To receive compensation, please return to <a href="https://app.prolific.co/submissions/complete?cc=3F692854">Prolific.</a></p>
+`,
+};
+timeline.push(end);
+
+
+jsPsych.run(timeline);
+
+
+    /**
+     * Save the jsPsych CSV output to the server
+    
+     function save_csv() {
+        if(!window.experiment_metadata) {
+            // Get a user ID
+            let id = window.location.search.match('[?&]PROLIFIC_PID=\\w+'); //error because missing?
+            if(typeof id !== "string")
+                id = Math.floor(100000000 + Math.random() * 900000000);
+            jsPsych.data.addProperties({user_id: id});
+
+            // Fetch all the experiment data and send it to the server
+            window.experiment_metadata = {
+                user_id: id,
+                experiment: 'advisorPreference',
+                version: [0, 1, 0]
+            };
+        }
+
+
+    const data = {
+        ...window.experiment_metadata,
+        csv: jsPsych.data.get().csv()
+    };
+
+    fetch(
+        "savecsv.php",
+        {
+            method: "POST",
+            body: JSON.stringify(data),
+            type: 'application/json'
+        }
+        )
+            .then(r => r.text())
+            .then(b => console.log(b));
+        };
+
+    /**
+     * Test the ability to save files on the server
+     
+    function test_save() {
+        return fetch(
+            "savecsv.php",
+            {
+                method: "POST",
+                body: JSON.stringify(saveStructure),
+                type: 'application/json'
+            }
+        )
+            .then(r => {
+                if (r.status !== 200) {
+                    document.getElementById('save-error').classList.add('show');
+                    throw new Error('Problem saving data');
+                }
+                else
+                    console.log('Save data test okay!');
+            });
+    }
+
+var numberOfFailed = jsPsych.data.get().count(attentionChecking = 1)
+*/
+</script>
+</html>
