@@ -452,7 +452,6 @@ var TQ3 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-
 }
 
 var TQ3A = {
@@ -1682,9 +1681,7 @@ var advisorARating = {
   randomize_question_order: true,
   required: true,
   preamble: '<p>Please rate '+name[round]+' on the following questions</p><br>'+ advisorImage[round]+'',
-  on_finish: (trial)=>{
-    saveStructure.saveAdvisorARating(trial);
-  }
+
 };
 
 
@@ -1729,9 +1726,6 @@ var advisorBRating = {
   ],
   randomize_question_order: true,
   preamble: '<p>Please rate '+name[1-round]+' on the following questions</p><br>'+ advisorImage[1-round]+'',
-  on_finish: (trial)=>{
-    saveStructure.saveAdvisorBRating(trial);
-  }
 };
 
 advisorArray = [advisorARating, advisorBRating]
@@ -1793,9 +1787,6 @@ var manipulationCheck = {type: jsPsychSurveyMultiChoice,
     },
   ],
   randomize_question_order: true,
-  on_finish: (trial)=>{
-    saveStructure.saveManipulationCheck(trial);
-  }
 };
 timeline.push(manipulationCheck)
 
@@ -1837,9 +1828,6 @@ var EARS = {
 },
 ],
   randomize_question_order: true,
-  on_finish: (trial)=>{
-    saveStructure.saveEARS(trial);
-  }
 };
 timeline.push(EARS)
 
@@ -1878,9 +1866,6 @@ var demographics = {
     ]
   ],
   button_label_finish: 'Finish',
-  on_finish: (trial)=>{
-    saveStructure.saveDemographics(trial);
-  }
 };
 timeline.push(demographics)
 
