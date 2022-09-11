@@ -1,0 +1,383 @@
+* {
+    margin: 0px;
+    padding: 0px;
+  }
+
+
+
+.container {
+    width: 50rem;
+    margin-left: auto; 
+    margin-right: auto;
+    border: 1px solid black
+}
+
+.container img {
+  float: right; 
+  top: 10px; 
+  right: 10px;
+}
+
+.textContainer {
+  width: 61rem;
+  margin-left: auto; 
+  margin-right: auto;
+}
+
+#generalBox button {
+    height: 80px;
+    width: 80px;
+    color: var(--response-color);
+    font-weight: bold;
+    font-size: 3em;
+    font-family: monospace;
+    cursor: pointer; 
+}
+
+.line1 {
+  width:0px; 
+  height:300px; 
+  border: 2px solid black; 
+  position: fixed;
+  left:34rem;
+}
+
+
+.unselectable {
+  -moz-user-select: none ;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+  .box1 {
+    width: 270px;
+    height: 100px;
+    margin: 0px auto 20px auto;
+    border: 4px solid #000000;
+    text-align: center;
+    font-weight: 900;
+    color: #000000;
+    font-family: arial;
+    position: relative;
+    padding: 20px 10px 10px 20px;
+  }
+
+  .box2 {
+    width: 280px;
+    height: 100px;
+    margin: 0px auto 20px auto;
+    border: 4px solid #000000;
+    border-radius: 35px;
+    align-items: center;
+    text-align: center;
+    vertical-align: sub;
+    font-weight: 900;
+    color: #000000;
+    font-family: arial;
+    position: relative;
+    padding: 20px 10px 10px 10px;
+  }
+
+  /* speech bubble 5 */
+  
+  .sb5:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #000000;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #000000;
+    border-bottom: 10px solid transparent;
+    right: -21px;
+    top: 6px;
+  }
+  
+  .sb5:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 7px solid #fff;
+    border-right: 7px solid transparent;
+    border-top: 7px solid #fff;
+    border-bottom: 7px solid transparent;
+    right: -11px;
+    top: 10px;
+  }
+  
+  
+  /* speech bubble 6 */
+  
+  .sb6:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #000000;
+    border-top: 10px solid #000000;
+    border-bottom: 10px solid transparent;
+    left: -21px;
+    top: 6px;
+  }
+  
+  .sb6:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 7px solid transparent;
+    border-right: 7px solid #fff;
+    border-top: 7px solid #fff;
+    border-bottom: 7px solid transparent;
+    left: -11px;
+    top: 10px;
+  }
+  
+  
+  /* speech bubble 7 */
+  
+  .sb7:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid #000000;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #000000;
+    border-bottom: 10px solid transparent;
+    left: 20px;
+    bottom: -23px;
+  }
+  
+  .sb7:after {
+    content: "";
+    width: 0px;
+    height: 30px;
+    position: absolute;
+    border-left: 10px solid #fff;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #fff;
+    border-bottom: 10px solid transparent;
+    left: 24px;
+    bottom: -13px;
+  }
+  
+  
+  /* speech bubble 8 */
+  
+  .sb8:before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #000000;
+    border-top: 10px solid #000000;
+    border-bottom: 10px solid transparent;
+    right: 20px;
+    bottom: -23px;
+  }
+  
+  .sb8:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid #fff;
+    border-top: 10px solid #fff;
+    border-bottom: 10px solid transparent;
+    right: 24px;
+    bottom: -13px;
+  }
+
+
+/* speech bubble 9 */
+
+.sb9:before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #000000;
+  border-bottom: 10px solid transparent;
+  right: 50%;
+  bottom: -23px;
+}
+
+.sb9:after {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #fff;
+  border-bottom: 10px solid transparent;
+  right: 50%;
+  bottom: -18px;
+}
+
+
+/* speech bubble 10 */
+
+.sb10:before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid #00bfb6;
+  right: 50%;
+  top: -23px;
+}
+
+.sb10:after {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid #fff;
+  right: 50%;
+  top: -18px;
+}
+
+
+/* speech bubble 11 */
+
+.sb11:before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid transparent;
+  border-right: 10px solid #00bfb6;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  left: -23px;
+}
+
+.sb11:after {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid transparent;
+  border-right: 10px solid #fff;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  left: -17px;
+}
+
+
+/* speech bubble 12 */
+
+.sb12:before {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid #00bfb6;
+  border-right: 10px solid transparent;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  right: -23px;
+}
+
+.sb12:after {
+  content: "";
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  border-left: 10px solid #fff;
+  border-right: 10px solid transparent;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  right: -17px;
+}
+
+@keyframes type1{ 
+    0% {opacity: 0}
+    100% {opacity: 1}
+  } 
+
+.text-delay-appear{
+  margin: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  width: auto;
+  opacity: 0;
+  animation: type1 1s steps(60, end) forwards;
+  animation-delay: 3.5s;
+}
+
+@keyframes type {
+  from { width: 0; }
+  to { width: 100%; opacity: 1;}
+}
+
+.text-delay{
+  margin: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  width: auto;
+  opacity:1;
+  animation: type 3s steps(60, end);
+}
+
+.float-container {
+  border: 3px solid #000000;
+  padding: 10px;
+  width: auto;
+}
+
+.float-child {
+  width: 50%;
+  float: left;
+  padding: 0px;
+  border: 2px solid red;
+}  
+.float-child2 {
+  width: 50%;
+  float: right;
+  padding: 0px;
+  border: 2px solid red;
+}  
+
+.flex-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 60em;
+  height: 22em;
+}
+
+.flex-container > div {
+  border:1px #000000;
+  margin: 10px;
+  padding: 20px;
+}
+
+.flex-container2 {
+  display: flex;
+  justify-content: flex-end;
+  width: 40em;
+  height: 13em;
+}
+
+.flex-container2 > div {
+  border:1px #000000;
+  margin: 10px;
+  padding: 20px;
+  height: 10px;
+}
