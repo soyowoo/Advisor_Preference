@@ -7,6 +7,7 @@
     <title>Advisor Preference</title>
     <script src="functions.js"></script>
     <script src="temperature.js"></script>
+    <script src="saveData.js"></script>
     <script src="https://unpkg.com/jspsych@7.1.2"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.1.0"></script>
@@ -75,7 +76,7 @@ jsPsych.data.addProperties({ //how to save added properties?
 
 var experimentDate = Date.now();
 
-
+/**
 let saveStructure = new Structure({
   date: experimentDate,
   trialsCompleted: 0,
@@ -87,7 +88,7 @@ let saveStructure = new Structure({
   study_id_consent: study_id_consent,
   session_id_consent: session_id_consent,
 });
-
+*/
 
 //const queryString = window.location.search;
 //var pid = queryString.split("ParticipantID=")[1];
@@ -297,7 +298,7 @@ var attentionCheck = {
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
   on_finish: (trial)=>{
-    saveStructure.saveAttentionCheck1(trial);
+    //saveStructure.saveAttentionCheck1(trial);
     let attentionCheck1 = checkSlider2(trial.response)
     if (attentionCheck1 == 1) {
     jsPsych.endExperiment('You have failed the attention checking questions.<br>You can no longer participate in the study and will not be compensated.<br> Thank you for your time.')
@@ -332,7 +333,7 @@ var attentionCheckA = {
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
   on_finish: (trial)=>{
-    saveStructure.saveAttentionCheck2(trial);
+    //saveStructure.saveAttentionCheck2(trial);
     let attentionCheck2 = checkSlider2(trial.response)
     if (attentionCheck2 == 1) {
     jsPsych.endExperiment('You have failed the attention checking questions.<br>You can no longer participate in the study and will not be compensated.<br> Thank you for your time.')
@@ -356,9 +357,6 @@ var TQ1 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
 }
 
 var TQ1A = {
@@ -387,9 +385,6 @@ var TQ1A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
 };
 
 var TQ2 = {
@@ -409,9 +404,6 @@ var TQ2 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
 }
 
 var TQ2A = {
@@ -440,9 +432,6 @@ var TQ2A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
 };
 
 
@@ -463,9 +452,7 @@ var TQ3 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var TQ3A = {
@@ -494,9 +481,7 @@ var TQ3A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var TQ4 = {
@@ -516,9 +501,7 @@ var TQ4 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var TQ4A = {
@@ -548,9 +531,7 @@ var TQ4A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var TQ5 = {
@@ -570,9 +551,7 @@ var TQ5 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var TQ5A = {
@@ -601,9 +580,7 @@ var TQ5A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var TQ6 = {
@@ -623,9 +600,7 @@ var TQ6 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var TQ6A = {
@@ -654,9 +629,7 @@ var TQ6A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var trainingArrayAleatory = [[TQ3, TQ3A], [TQ5, TQ5A], [TQ6, TQ6A]];
@@ -713,9 +686,7 @@ var Q1 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q1A = {
@@ -744,9 +715,7 @@ var Q1A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q2 = {
@@ -766,9 +735,7 @@ var Q2 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q2A = {
@@ -797,9 +764,7 @@ var Q2A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q3 = {
@@ -819,9 +784,7 @@ var Q3 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q3A = {
@@ -850,9 +813,7 @@ var Q3A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q4 = {
@@ -872,9 +833,7 @@ var Q4 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q4A = {
@@ -904,9 +863,7 @@ var Q4A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q5 = {
@@ -926,9 +883,7 @@ var Q5 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q5A = {
@@ -957,9 +912,7 @@ var Q5A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q6 = {
@@ -979,9 +932,7 @@ var Q6 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q6A = {
@@ -1010,9 +961,7 @@ var Q6A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q7 = {
@@ -1031,9 +980,7 @@ var Q7 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q7A = {
@@ -1062,9 +1009,7 @@ var Q7A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q8 = {
@@ -1084,9 +1029,7 @@ var Q8 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q8A = {
@@ -1115,9 +1058,7 @@ var Q8A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q9 = {
@@ -1137,9 +1078,7 @@ var Q9 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q9A = {
@@ -1168,9 +1107,7 @@ var Q9A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q10 = {
@@ -1190,9 +1127,7 @@ var Q10 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q10A = {
@@ -1222,9 +1157,7 @@ var Q10A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q11 = {
@@ -1244,9 +1177,7 @@ var Q11 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q11A = {
@@ -1275,9 +1206,7 @@ var Q11A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q12 = {
@@ -1297,9 +1226,7 @@ var Q12 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q12A = {
@@ -1328,9 +1255,7 @@ var Q12A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q13 = {
@@ -1349,9 +1274,7 @@ var Q13 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q13A = {
@@ -1380,9 +1303,7 @@ var Q13A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q14 = {
@@ -1402,9 +1323,7 @@ var Q14 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q14A = {
@@ -1433,9 +1352,7 @@ var Q14A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q15 = {
@@ -1455,9 +1372,7 @@ var Q15 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q15A = {
@@ -1486,9 +1401,7 @@ var Q15A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q16 = {
@@ -1508,9 +1421,7 @@ var Q16 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q16A = {
@@ -1540,9 +1451,7 @@ var Q16A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q17 = {
@@ -1562,9 +1471,7 @@ var Q17 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q17A = {
@@ -1593,9 +1500,7 @@ var Q17A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 var Q18 = {
@@ -1615,9 +1520,7 @@ var Q18 = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],  
   button_label: 'Press to submit your answer and view advisor',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 }
 
 var Q18A = {
@@ -1646,9 +1549,7 @@ var Q18A = {
   max: 101,
   labels: ['100%','51%', '51%','100%'],
   button_label: 'Press to submit your final answer',
-  on_finish: (trial)=>{
-    saveStructure.saveSliderResponse(trial);
-  }
+
 };
 
 
